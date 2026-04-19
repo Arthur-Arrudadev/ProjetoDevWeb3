@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resultados - Sistema de Estudo</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+  <div id="sidebar"></div>
+  <main class="main">
+    <h1 class="page-title">Resultados do Aluno</h1>
+
+    <button class="btn-pdf" id="btnPdf">📄 Exportar Relatório PDF</button>
+
+    <div class="card">
+      <div class="card-title">Histórico de Avaliações</div>
+      <div class="table-wrap">
+        <table id="tabelaResultados">
+          <thead>
+            <tr>
+              <th>Assunto</th>
+              <th>Data</th>
+              <th>Total</th>
+              <th>Acertos</th>
+              <th>Erros</th>
+              <th>Revisão</th>
+              <th>Aproveitamento</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyResultados">
+            <tr><td colspan="7" style="text-align:center;color:#64748b;">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/sidebar.js"></script>
+  <script>
+    protegerPagina();
+    document.getElementById('sidebar').innerHTML = renderSidebar('resultados.html');
+
+    let dadosResultados = [];
+
+    async function carregarResultados() {
+      const usuario = getUsuario();
+      dadosResultados = await api(`/resultados/${usuario.id}`);
+      const tbody = document.getElementById('tbodyResultados');
+
+      if (dadosResultados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#64748b;">Nenhum resultado encontrado.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = dadosResultados.map(r => {
+        const total = r.total_questoes || (r.acertos + r.erros + r.revisao);
+        const pct = total > 0 ? Math.round(r.acertos / total * 100) : 0;
+        const cor = pct >= 70 ? 'green' : pct >= 50 ? 'yellow' : 'red';
+        const data = new Date(r.data_avaliacao).toLocaleDateString('pt-BR');
+        return `
+          <tr>
+            <td><strong>${r.assunto}</strong></td>
+            <td>${data}</td>
+            <td>${total}</td>
+            <td><span class="badge green">${r.acertos}</span></td>
+            <td><span class="badge red">${r.erros}</span></td>
+            <td><span class="badge yellow">${r.revisao}</span></td>
+            <td><span class="badge ${cor}">${pct}%</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('btnPdf').addEventListener('click', () => {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const usuario = getUsuario();
+      const agora = new Date().toLocaleString('pt-BR');
+
+      doc.setFontSize(18);
+      doc.setTextColor(79, 70, 229);
+      doc.text('Sistema de Estudo - Relatório de Resultados', 14, 20);
+
+      doc.setFontSize(11);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Aluno: ${usuario.nome} (@${usuario.usuario})`, 14, 30);
+      doc.text(`Gerado em: ${agora}`, 14, 37);
+
+      doc.setDrawColor(226, 232, 240);
+      doc.line(14, 42, 196, 42);
+
+      const totalAcertos = dadosResultados.reduce((s, r) => s + r.acertos, 0);
+      const totalErros = dadosResultados.reduce((s, r) => s + r.erros, 0);
+      const totalRevisao = dadosResultados.reduce((s, r) => s + r.revisao, 0);
+      const totalQuestoes = totalAcertos + totalErros + totalRevisao;
+      const taxaGeral = totalQuestoes > 0 ? Math.round(totalAcertos / totalQuestoes * 100) : 0;
+
+      doc.setFontSize(12);
+      doc.setTextColor(30, 41, 59);
+      doc.text('Resumo Geral', 14, 52);
+      doc.setFontSize(10);
+      doc.setTextColor(100, 116, 139);
+      doc.text(`Total de questões: ${totalQuestoes}  |  Acertos: ${totalAcertos}  |  Erros: ${totalErros}  |  Revisão: ${totalRevisao}  |  Taxa: ${taxaGeral}%`, 14, 60);
+
+      doc.autoTable({
+        startY: 68,
+        head: [['Assunto', 'Data', 'Total', 'Acertos', 'Erros', 'Revisão', 'Aproveitamento']],
+        body: dadosResultados.map(r => {
+          const total = r.total_questoes || (r.acertos + r.erros + r.revisao);
+          const pct = total > 0 ? Math.round(r.acertos / total * 100) + '%' : '0%';
+          return [
+            r.assunto,
+            new Date(r.data_avaliacao).toLocaleDateString('pt-BR'),
+            total, r.acertos, r.erros, r.revisao, pct
+          ];
+        }),
+        styles: { fontSize: 10, cellPadding: 5 },
+        headStyles: { fillColor: [79, 70, 229], textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [248, 250, 252] },
+        columnStyles: { 6: { fontStyle: 'bold' } }
+      });
+
+      const finalY = doc.lastAutoTable.finalY + 14;
+      doc.setFontSize(9);
+      doc.setTextColor(148, 163, 184);
+      doc.text('Sistema de Estudo - Relatório gerado automaticamente', 14, finalY);
+
+      doc.save(`relatorio_${usuario.usuario}_${new Date().toISOString().slice(0,10)}.pdf`);
+    });
+
+    carregarResultados();
+  </script>
+</body>
+</html>

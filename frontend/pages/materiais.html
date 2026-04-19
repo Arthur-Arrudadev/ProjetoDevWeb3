@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Materiais - Sistema de Estudo</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div id="sidebar"></div>
+  <main class="main">
+    <h1 class="page-title">Materiais de Estudo Complementares</h1>
+
+    <div class="card" style="margin-bottom:20px;">
+      <!-- Busca -->
+      <div style="margin-bottom:16px;">
+        <input type="text" id="inputBusca" placeholder="🔎 Buscar material por título ou descrição..."
+          style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;transition:border 0.2s;"
+          onfocus="this.style.borderColor='#4f46e5'" onblur="this.style.borderColor='#e2e8f0'">
+      </div>
+      <!-- Filtros por categoria -->
+      <div class="card-title">Filtrar por Categoria</div>
+      <div class="filtro-bar" id="filtros">
+        <button class="btn-filtro active" data-cat="Todos">Todos</button>
+      </div>
+    </div>
+
+    <div style="font-size:13px;color:#64748b;margin-bottom:12px;" id="contador"></div>
+
+    <div class="materiais-grid" id="materiaisGrid">
+      <div style="color:#64748b;font-size:14px;">Carregando materiais...</div>
+    </div>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/sidebar.js"></script>
+  <script src="../js/materiais-data.js"></script>
+  <script>
+    protegerPagina();
+    document.getElementById('sidebar').innerHTML = renderSidebar('materiais.html');
+
+    let categoriaAtiva = 'Todos';
+    let todosMateriais = [];
+
+    function inicializar() {
+      todosMateriais = MATERIAIS_FALLBACK;
+
+      const cats = [...new Set(todosMateriais.map(m => m.categoria))].sort();
+      const filtros = document.getElementById('filtros');
+      cats.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-filtro';
+        btn.dataset.cat = cat;
+        btn.textContent = cat;
+        filtros.appendChild(btn);
+      });
+
+      renderizar();
+    }
+
+    function renderizar() {
+      const busca = document.getElementById('inputBusca').value.trim().toLowerCase();
+      const grid  = document.getElementById('materiaisGrid');
+
+      let lista = todosMateriais;
+
+      if (categoriaAtiva !== 'Todos') {
+        lista = lista.filter(m => m.categoria === categoriaAtiva);
+      }
+
+      if (busca) {
+        lista = lista.filter(m =>
+          m.titulo.toLowerCase().includes(busca) ||
+          (m.descricao && m.descricao.toLowerCase().includes(busca))
+        );
+      }
+
+      document.getElementById('contador').textContent =
+        `${lista.length} material(is) encontrado(s)`;
+
+      if (lista.length === 0) {
+        grid.innerHTML = '<div style="color:#64748b;font-size:14px;padding:20px 0;">Nenhum material encontrado para essa busca.</div>';
+        return;
+      }
+
+      grid.innerHTML = lista.map(m => `
+        <div class="material-card">
+          <span class="material-badge">${m.categoria}</span>
+          <h3>${m.titulo}</h3>
+          <p>${m.descricao || ''}</p>
+          <a href="${m.url}" target="_blank" class="btn-link">🔍 Estudar agora</a>
+        </div>
+      `).join('');
+    }
+
+    function filtrar(cat) {
+      categoriaAtiva = cat;
+      document.querySelectorAll('.btn-filtro').forEach(b => {
+        b.classList.toggle('active', b.dataset.cat === cat);
+      });
+      renderizar();
+    }
+
+    document.getElementById('filtros').addEventListener('click', (e) => {
+      if (e.target.classList.contains('btn-filtro')) filtrar(e.target.dataset.cat);
+    });
+
+    document.getElementById('inputBusca').addEventListener('input', renderizar);
+
+    inicializar();
+  </script>
+</body>
+</html>

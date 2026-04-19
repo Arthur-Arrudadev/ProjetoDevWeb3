@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tempo de Estudo - Sistema de Estudo</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div id="sidebar"></div>
+  <main class="main">
+    <h1 class="page-title">Tempo de Estudo por Assunto</h1>
+
+    <div class="grid-3" style="margin-bottom:24px;">
+      <div class="stat-card">
+        <div class="stat-icon blue">⏱️</div>
+        <div>
+          <div class="stat-value" id="tempoTotal">-</div>
+          <div class="stat-label">Tempo Total</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">📚</div>
+        <div>
+          <div class="stat-value" id="totalAssuntos">-</div>
+          <div class="stat-label">Assuntos Estudados</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon yellow">🔥</div>
+        <div>
+          <div class="stat-value" id="assuntoTop">-</div>
+          <div class="stat-label">Mais Estudado</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Distribuição por Assunto</div>
+      <div id="listaTempos">
+        <div style="color:#64748b;font-size:14px;">Carregando...</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <div class="card-title">Registrar Nova Sessão de Estudo</div>
+      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+        <div class="form-group" style="margin:0;flex:1;min-width:180px;">
+          <label>Assunto</label>
+          <input type="text" id="inputAssunto" placeholder="Ex: Matemática" style="width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;">
+        </div>
+        <button id="btnIniciar" style="padding:10px 20px;background:#10b981;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">▶ Iniciar</button>
+        <button id="btnFinalizar" style="padding:10px 20px;background:#ef4444;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:none;">⏹ Finalizar</button>
+        <span id="timerDisplay" style="font-size:14px;color:#64748b;font-weight:600;"></span>
+      </div>
+      <div id="msgSessao" style="margin-top:10px;font-size:13px;color:#10b981;display:none;"></div>
+    </div>
+  </main>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/sidebar.js"></script>
+  <script>
+    protegerPagina();
+    document.getElementById('sidebar').innerHTML = renderSidebar('tempo.html');
+
+    let sessaoAtiva = null;
+    let timerInterval = null;
+    let segundos = 0;
+
+    async function carregarTempos() {
+      const usuario = getUsuario();
+      const dados = await api(`/tempo/${usuario.id}`);
+
+      if (dados.length === 0) {
+        document.getElementById('listaTempos').innerHTML = '<div style="color:#64748b;font-size:14px;">Nenhuma sessão registrada ainda.</div>';
+        return;
+      }
+
+      const maxMin = Math.max(...dados.map(d => d.total_minutos));
+      const totalMin = dados.reduce((s, d) => s + d.total_minutos, 0);
+
+      document.getElementById('tempoTotal').textContent = formatarMinutos(totalMin);
+      document.getElementById('totalAssuntos').textContent = dados.length;
+      document.getElementById('assuntoTop').textContent = dados[0].assunto;
+
+      document.getElementById('listaTempos').innerHTML = dados.map(d => {
+        const pct = maxMin > 0 ? Math.round(d.total_minutos / maxMin * 100) : 0;
+        const primeira = d.primeira_sessao ? new Date(d.primeira_sessao).toLocaleDateString('pt-BR') : '-';
+        const ultima = d.ultima_sessao ? new Date(d.ultima_sessao).toLocaleDateString('pt-BR') : '-';
+        return `
+          <div class="tempo-item">
+            <div style="min-width:140px;">
+              <div class="tempo-assunto">${d.assunto}</div>
+              <div class="tempo-detalhe">${d.sessoes} sessão(ões) · ${primeira} → ${ultima}</div>
+            </div>
+            <div class="tempo-bar-wrap">
+              <div class="tempo-bar-bg">
+                <div class="tempo-bar-fill" style="width:${pct}%"></div>
+              </div>
+            </div>
+            <div class="tempo-valor">${formatarMinutos(d.total_minutos)}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function atualizarTimer() {
+      segundos++;
+      const h = Math.floor(segundos / 3600);
+      const m = Math.floor((segundos % 3600) / 60);
+      const s = segundos % 60;
+      document.getElementById('timerDisplay').textContent =
+        `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    document.getElementById('btnIniciar').addEventListener('click', async () => {
+      const assunto = document.getElementById('inputAssunto').value.trim();
+      if (!assunto) { alert('Informe o assunto!'); return; }
+      const usuario = getUsuario();
+      const data = await api('/sessao/iniciar', {
+        method: 'POST',
+        body: JSON.stringify({ usuario_id: usuario.id, assunto })
+      });
+      sessaoAtiva = data.id;
+      segundos = 0;
+      timerInterval = setInterval(atualizarTimer, 1000);
+      document.getElementById('btnIniciar').style.display = 'none';
+      document.getElementById('btnFinalizar').style.display = 'inline-block';
+      document.getElementById('msgSessao').style.display = 'block';
+      document.getElementById('msgSessao').textContent = `Estudando: ${assunto}`;
+    });
+
+    document.getElementById('btnFinalizar').addEventListener('click', async () => {
+      if (!sessaoAtiva) return;
+      clearInterval(timerInterval);
+      await api(`/sessao/finalizar/${sessaoAtiva}`, { method: 'PUT' });
+      sessaoAtiva = null;
+      document.getElementById('btnIniciar').style.display = 'inline-block';
+      document.getElementById('btnFinalizar').style.display = 'none';
+      document.getElementById('timerDisplay').textContent = '';
+      document.getElementById('msgSessao').textContent = '✅ Sessão finalizada!';
+      document.getElementById('inputAssunto').value = '';
+      carregarTempos();
+    });
+
+    carregarTempos();
+  </script>
+</body>
+</html>
