@@ -4,7 +4,8 @@ function renderSidebar(paginaAtiva) {
     { href: 'dashboard.html', icon: '📊', label: 'Dashboard' },
     { href: 'materiais.html', icon: '📖', label: 'Materiais' },
     { href: 'resultados.html', icon: '📋', label: 'Resultados' },
-    { href: 'tempo.html',     icon: '⏱️', label: 'Tempo de Estudo' }
+    { href: 'tempo.html',     icon: '⏱️', label: 'Tempo de Estudo' },
+    { href: 'quiz.html',      icon: '🧠', label: 'Quiz' }
   ];
 
   const nav = links.map(l => `

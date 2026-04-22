@@ -36,6 +36,24 @@ async function conectar() {
   process.exit(1); // Encerra o processo se não conseguir conectar
 }
 
+// CADASTRO - cria novo usuário
+app.post('/api/cadastro', async (req, res) => {
+  const { nome, usuario, senha } = req.body;
+  if (!nome || !usuario || !senha) return res.status(400).json({ erro: 'Preencha todos os campos' });
+  if (senha.length < 6) return res.status(400).json({ erro: 'Senha deve ter pelo menos 6 caracteres' });
+  try {
+    const [existe] = await db.execute('SELECT id FROM usuarios WHERE usuario = ?', [usuario]);
+    if (existe.length > 0) return res.status(409).json({ erro: 'Usuário já existe' });
+    const [result] = await db.execute(
+      'INSERT INTO usuarios (nome, usuario, senha) VALUES (?, ?, ?)',
+      [nome, usuario, senha]
+    );
+    res.json({ sucesso: true, usuario: { id: result.insertId, nome, usuario } });
+  } catch (e) {
+    res.status(500).json({ erro: 'Erro interno' });
+  }
+});
+
 // LOGIN - valida usuário e senha no banco
 app.post('/api/login', async (req, res) => {
   const { usuario, senha } = req.body;
@@ -213,6 +231,100 @@ app.put('/api/sessao/finalizar/:id', async (req, res) => {
       [req.params.id]
     );
     res.json({ sucesso: true });
+  } catch (e) {
+    res.status(500).json({ erro: 'Erro interno' });
+  }
+});
+
+// QUIZ - retorna 10 questões aleatórias de uma matéria
+app.get('/api/quiz/:materia', async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      'SELECT * FROM questoes WHERE materia = ? ORDER BY RAND() LIMIT 10',
+      [req.params.materia]
+    );
+    res.json(rows);
+  } catch (e) {
+    res.status(500).json({ erro: 'Erro interno' });
+  }
+});
+
+// QUIZ MATERIAS - lista matérias disponíveis no quiz
+app.get('/api/quiz-materias', async (req, res) => {
+  try {
+    const [rows] = await db.execute('SELECT DISTINCT materia FROM questoes ORDER BY materia');
+    res.json(rows.map(r => r.materia));
+  } catch (e) {
+    res.status(500).json({ erro: 'Erro interno' });
+  }
+});
+
+// QUIZ RESULTADO - salva resultado do quiz na tabela resultados
+app.post('/api/quiz/resultado', async (req, res) => {
+  const { usuario_id, assunto, acertos, erros, revisao } = req.body;
+  const total = acertos + erros + revisao;
+  try {
+    await db.execute(
+      'INSERT INTO resultados (usuario_id, assunto, total_questoes, acertos, erros, revisao, data_avaliacao) VALUES (?, ?, ?, ?, ?, ?, CURDATE())',
+      [usuario_id, assunto, total, acertos, erros, revisao]
+    );
+    res.json({ sucesso: true });
+  } catch (e) {
+    res.status(500).json({ erro: 'Erro interno' });
+  }
+});
+
+// HEATMAP - minutos estudados por dia nas últimas 4 semanas
+app.get('/api/heatmap/:usuarioId', async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      `SELECT DATE(inicio) as dia, SUM(duracao_minutos) as minutos
+       FROM sessoes_estudo
+       WHERE usuario_id = ? AND inicio >= CURDATE() - INTERVAL 27 DAY
+       GROUP BY DATE(inicio)`,
+      [req.params.usuarioId]
+    );
+    const mapa = {};
+    rows.forEach(r => { mapa[r.dia.toISOString().slice(0,10)] = parseInt(r.minutos) || 0; });
+    res.json(mapa);
+  } catch (e) {
+    res.status(500).json({ erro: 'Erro interno' });
+  }
+});
+
+// DESEMPENHO SEMANAL - acertos/erros por dia da semana nas últimas 4 semanas
+app.get('/api/desempenho-semanal/:usuarioId', async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      `SELECT
+         FLOOR(DATEDIFF(CURDATE(), data_avaliacao) / 7) as semana,
+         DAYOFWEEK(data_avaliacao) as dia_semana,
+         SUM(acertos) as acertos,
+         SUM(erros) as erros
+       FROM resultados
+       WHERE usuario_id = ?
+         AND data_avaliacao >= CURDATE() - INTERVAL 27 DAY
+       GROUP BY semana, dia_semana
+       ORDER BY semana DESC, dia_semana ASC`,
+      [req.params.usuarioId]
+    );
+    // Monta estrutura: 4 semanas x 7 dias
+    // DAYOFWEEK: 1=Dom,2=Seg,...,7=Sab -> reordenamos para Seg(2)...Dom(1)
+    const ordem = [2,3,4,5,6,7,1]; // Seg a Dom
+    const semanas = [0,1,2,3]; // 0=atual, 3=mais antiga
+    const mapa = {};
+    rows.forEach(r => {
+      const k = `${r.semana}_${r.dia_semana}`;
+      mapa[k] = { acertos: parseInt(r.acertos)||0, erros: parseInt(r.erros)||0 };
+    });
+    const resultado = semanas.map(s => ({
+      label: `Semana ${4 - s}`,
+      dias: ordem.map(d => ({
+        acertos: mapa[`${s}_${d}`]?.acertos || 0,
+        erros:   mapa[`${s}_${d}`]?.erros   || 0
+      }))
+    }));
+    res.json(resultado);
   } catch (e) {
     res.status(500).json({ erro: 'Erro interno' });
   }

@@ -7,38 +7,44 @@
 
 ---
 
-## ▶️ Como Rodar com XAMPP
+## ▶️ Como Rodar
 
-### 1. Criar o banco de dados
+### 1. Configurar o banco de dados
 
-**a) Abre o XAMPP Control Panel e inicia o MySQL:**
-- Clica em **Start** no **MySQL**
-- Aguarda ficar verde
+**a) Abra o XAMPP Control Panel e inicie o MySQL:**
+- Clique em **Start** no **MySQL**
+- Aguarde ficar verde
 
-**b) Abre o phpMyAdmin:**
-- Clica em **Admin** ao lado do MySQL no XAMPP
-- Ou acessa: http://localhost/phpmyadmin
+**b) Abra o phpMyAdmin:**
+- Clique em **Admin** ao lado do MySQL no XAMPP
+- Ou acesse: http://localhost/phpmyadmin
 
-**c) Importa o banco:**
-- Clica em **SQL** no topo
-- Copia TODO o conteúdo do arquivo `database/init.sql`
-- Cola na caixa de texto e clica em **Executar**
+**c) Importe o banco:**
+- Clique em **SQL** no topo
+- Copie TODO o conteúdo do arquivo `database/init.sql`
+- Cole na caixa de texto e clique em **Executar**
+
+> ⚠️ Se já tinha o banco criado antes, apague o banco `sistema_estudo` no phpMyAdmin e reimporte o `init.sql` para incluir a tabela de questões do Quiz.
+
+---
 
 ### 2. Iniciar o backend
 
-**Opção 1 - Duplo clique no arquivo:**
+**Opção 1 — Duplo clique no arquivo:**
 ```
 iniciar.bat
 ```
 
-**Opção 2 - Pelo terminal:**
+**Opção 2 — Pelo terminal:**
 ```bash
 cd backend
 npm install
 node server.js
 ```
 
-Aguarde ver: `API rodando na porta 3000` e `Banco conectado!`
+Aguarde ver no terminal: `API rodando na porta 3001` e `Banco conectado!`
+
+---
 
 ### 3. Abrir o frontend no Chrome
 
@@ -53,6 +59,7 @@ start chrome --disable-web-security --user-data-dir="C:/tmp/chrome-dev" "c:/User
 ---
 
 ## 🔐 Login
+
 | Campo   | Valor  |
 |---------|--------|
 | Usuário | geral  |
@@ -65,7 +72,8 @@ start chrome --disable-web-security --user-data-dir="C:/tmp/chrome-dev" "c:/User
 | Tela | Descrição |
 |------|-----------|
 | **Login** | Validação de campos obrigatórios, bloqueia acesso sem dados |
-| **Dashboard** | Saudação personalizada + gráfico pizza + evolução semanal + recomendação inteligente |
+| **Dashboard** | Saudação + gráfico de pizza + desempenho por dia da semana (4 semanas) + heatmap de atividade + recomendação inteligente |
+| **Quiz** | Escolha a matéria, responda 10 questões com alternativas A/B/C/D, veja acertos/erros/revisão e salva no histórico automaticamente |
 | **Materiais** | 60+ materiais reais com busca em tempo real e filtro por categoria |
 | **Resultados** | Tabela de histórico + exportação PDF detalhado |
 | **Tempo de Estudo** | Barras por assunto + cronômetro para registrar sessões |
@@ -73,15 +81,26 @@ start chrome --disable-web-security --user-data-dir="C:/tmp/chrome-dev" "c:/User
 ---
 
 ## 🗄️ Banco de Dados (MySQL via XAMPP)
+
 - Host: `localhost:3306`
 - Banco: `sistema_estudo`
 - Usuário: `root` | Senha: *(vazia)*
 
+### Tabelas
+
+| Tabela | Descrição |
+|--------|-----------|
+| `usuarios` | Cadastro de usuários |
+| `materiais` | Materiais de estudo por categoria |
+| `questoes` | Questões do Quiz com alternativas A/B/C/D |
+| `resultados` | Histórico de acertos/erros/revisão por assunto |
+| `sessoes_estudo` | Sessões do cronômetro com duração em minutos |
+
 ---
 
 ## 🛑 Parar o sistema
-- Fecha a janela do terminal onde o backend está rodando
-- Para o MySQL no XAMPP Control Panel
+- Feche a janela do terminal onde o backend está rodando
+- Pare o MySQL no XAMPP Control Panel
 
 ---
 

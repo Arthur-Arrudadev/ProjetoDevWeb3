@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - Sistema de Estudo</title>
   <link rel="stylesheet" href="frontend/css/style.css">
+  <style>
+    .auth-toggle { text-align: center; margin-top: 16px; font-size: 13px; color: #64748b; }
+    .auth-toggle a { color: #4f46e5; font-weight: 600; cursor: pointer; text-decoration: none; }
+    .auth-toggle a:hover { text-decoration: underline; }
+    .alert.success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+  </style>
 </head>
 <body>
   <div class="login-page">
@@ -12,11 +18,13 @@
       <div class="login-logo">
         <div class="logo-circle">📚</div>
         <h1>Sistema de Estudo</h1>
-        <p>Faça login para continuar</p>
+        <p id="subtitulo">Faça login para continuar</p>
       </div>
 
       <div class="alert danger" id="alertErro"></div>
+      <div class="alert success" id="alertSucesso"></div>
 
+      <!-- TELA DE LOGIN -->
       <form id="formLogin" novalidate>
         <div class="form-group">
           <label for="usuario">Usuário</label>
@@ -29,76 +37,154 @@
           <div class="erro-msg" id="erroSenha">Campo obrigatório</div>
         </div>
         <button type="submit" class="btn-primary" id="btnLogin">Entrar</button>
+        <div class="auth-toggle">Não tem conta? <a onclick="mostrarCadastro()">Criar conta</a></div>
       </form>
 
-      <p style="text-align:center;margin-top:16px;font-size:12px;color:#94a3b8;">
-        Usuário: <strong>geral</strong> | Senha: <strong>entrar</strong>
-      </p>
+      <!-- TELA DE CADASTRO -->
+      <form id="formCadastro" novalidate style="display:none">
+        <div class="form-group">
+          <label for="cNome">Nome completo</label>
+          <input type="text" id="cNome" placeholder="Seu nome">
+          <div class="erro-msg" id="erroCNome">Campo obrigatório</div>
+        </div>
+        <div class="form-group">
+          <label for="cUsuario">Usuário</label>
+          <input type="text" id="cUsuario" placeholder="Escolha um usuário">
+          <div class="erro-msg" id="erroCUsuario">Campo obrigatório</div>
+        </div>
+        <div class="form-group">
+          <label for="cSenha">Senha</label>
+          <input type="password" id="cSenha" placeholder="Mínimo 6 caracteres">
+          <div class="erro-msg" id="erroCSenha">Mínimo 6 caracteres</div>
+        </div>
+        <div class="form-group">
+          <label for="cSenha2">Confirmar senha</label>
+          <input type="password" id="cSenha2" placeholder="Repita a senha">
+          <div class="erro-msg" id="erroCSenha2">As senhas não coincidem</div>
+        </div>
+        <button type="submit" class="btn-primary" id="btnCadastro">Criar conta</button>
+        <div class="auth-toggle">Já tem conta? <a onclick="mostrarLogin()">Fazer login</a></div>
+      </form>
     </div>
   </div>
 
   <script>
-    // Credenciais válidas (login local, sem depender da API)
-    const USUARIOS_VALIDOS = [
-      { usuario: 'geral', senha: 'entrar', id: 1, nome: 'Usuário Geral' }
-    ];
-
-    function getUsuario() {
-      try { return JSON.parse(localStorage.getItem('usuario')); } catch { return null; }
-    }
+    const API = 'http://localhost:3001/api';
 
     function irDashboard() {
       const base = window.location.href.replace(/\/[^\/]+$/, '');
       window.location.href = base + '/frontend/pages/dashboard.html';
     }
 
-    // Já logado? Vai direto (só redireciona se vier de outra página, não do logout)
-    if (getUsuario() && document.referrer === '') {
-      // não redireciona automaticamente — deixa o usuário fazer login
+    function mostrarErro(msg) {
+      const el = document.getElementById('alertErro');
+      el.textContent = msg; el.style.display = 'block';
+      document.getElementById('alertSucesso').style.display = 'none';
     }
 
-    document.getElementById('formLogin').addEventListener('submit', function(e) {
-      e.preventDefault();
+    function mostrarSucesso(msg) {
+      const el = document.getElementById('alertSucesso');
+      el.textContent = msg; el.style.display = 'block';
+      document.getElementById('alertErro').style.display = 'none';
+    }
 
+    function limparAlertas() {
+      document.getElementById('alertErro').style.display = 'none';
+      document.getElementById('alertSucesso').style.display = 'none';
+    }
+
+    function mostrarCadastro() {
+      limparAlertas();
+      document.getElementById('formLogin').style.display = 'none';
+      document.getElementById('formCadastro').style.display = 'block';
+      document.getElementById('subtitulo').textContent = 'Crie sua conta';
+    }
+
+    function mostrarLogin() {
+      limparAlertas();
+      document.getElementById('formCadastro').style.display = 'none';
+      document.getElementById('formLogin').style.display = 'block';
+      document.getElementById('subtitulo').textContent = 'Faça login para continuar';
+    }
+
+    // LOGIN
+    document.getElementById('formLogin').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      limparAlertas();
       const usuario = document.getElementById('usuario').value.trim();
       const senha   = document.getElementById('senha').value.trim();
 
-      // Limpa erros anteriores
-      document.getElementById('usuario').classList.remove('erro');
-      document.getElementById('senha').classList.remove('erro');
-      document.getElementById('erroUsuario').style.display = 'none';
-      document.getElementById('erroSenha').style.display   = 'none';
-      document.getElementById('alertErro').style.display   = 'none';
-
       let valido = true;
-      if (!usuario) {
-        document.getElementById('usuario').classList.add('erro');
-        document.getElementById('erroUsuario').style.display = 'block';
-        valido = false;
-      }
-      if (!senha) {
-        document.getElementById('senha').classList.add('erro');
-        document.getElementById('erroSenha').style.display = 'block';
-        valido = false;
-      }
+      ['usuario', 'senha'].forEach(id => {
+        document.getElementById(id).classList.remove('erro');
+        document.getElementById('erro' + id.charAt(0).toUpperCase() + id.slice(1)).style.display = 'none';
+      });
+
+      if (!usuario) { document.getElementById('usuario').classList.add('erro'); document.getElementById('erroUsuario').style.display = 'block'; valido = false; }
+      if (!senha)   { document.getElementById('senha').classList.add('erro');   document.getElementById('erroSenha').style.display = 'block';   valido = false; }
       if (!valido) return;
 
-      // Valida credenciais localmente (instantâneo, sem API)
-      const encontrado = USUARIOS_VALIDOS.find(
-        u => u.usuario === usuario && u.senha === senha
-      );
+      const btn = document.getElementById('btnLogin');
+      btn.textContent = 'Entrando...'; btn.disabled = true;
 
-      if (encontrado) {
-        localStorage.setItem('usuario', JSON.stringify({
-          id: encontrado.id,
-          nome: encontrado.nome,
-          usuario: encontrado.usuario
-        }));
+      try {
+        const res = await fetch(`${API}/login`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usuario, senha })
+        });
+        const data = await res.json();
+        if (!res.ok) { mostrarErro(data.erro); return; }
+        localStorage.setItem('usuario', JSON.stringify(data.usuario));
         irDashboard();
-      } else {
-        const el = document.getElementById('alertErro');
-        el.textContent = 'Usuário ou senha incorretos';
-        el.style.display = 'block';
+      } catch {
+        mostrarErro('Não foi possível conectar ao servidor. Verifique se o backend está rodando.');
+      } finally {
+        btn.textContent = 'Entrar'; btn.disabled = false;
+      }
+    });
+
+    // CADASTRO
+    document.getElementById('formCadastro').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      limparAlertas();
+
+      const nome    = document.getElementById('cNome').value.trim();
+      const usuario = document.getElementById('cUsuario').value.trim();
+      const senha   = document.getElementById('cSenha').value;
+      const senha2  = document.getElementById('cSenha2').value;
+
+      // Limpa erros
+      ['cNome','cUsuario','cSenha','cSenha2'].forEach(id => {
+        document.getElementById(id).classList.remove('erro');
+      });
+      ['erroCNome','erroCUsuario','erroCSenha','erroCSenha2'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+
+      let valido = true;
+      if (!nome)    { document.getElementById('cNome').classList.add('erro');    document.getElementById('erroCNome').style.display = 'block';    valido = false; }
+      if (!usuario) { document.getElementById('cUsuario').classList.add('erro'); document.getElementById('erroCUsuario').style.display = 'block'; valido = false; }
+      if (senha.length < 6) { document.getElementById('cSenha').classList.add('erro');  document.getElementById('erroCSenha').style.display = 'block';  valido = false; }
+      if (senha !== senha2) { document.getElementById('cSenha2').classList.add('erro'); document.getElementById('erroCSenha2').style.display = 'block'; valido = false; }
+      if (!valido) return;
+
+      const btn = document.getElementById('btnCadastro');
+      btn.textContent = 'Criando...'; btn.disabled = true;
+
+      try {
+        const res = await fetch(`${API}/cadastro`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome, usuario, senha })
+        });
+        const data = await res.json();
+        if (!res.ok) { mostrarErro(data.erro); return; }
+        mostrarSucesso('Conta criada! Faça login para continuar.');
+        document.getElementById('formCadastro').reset();
+        setTimeout(mostrarLogin, 1500);
+      } catch {
+        mostrarErro('Não foi possível conectar ao servidor.');
+      } finally {
+        btn.textContent = 'Criar conta'; btn.disabled = false;
       }
     });
   </script>

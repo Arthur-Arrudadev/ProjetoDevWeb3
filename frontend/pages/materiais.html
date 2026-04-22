@@ -76,7 +76,7 @@
       }
 
       document.getElementById('contador').textContent =
-        `${lista.length} material(is) encontrado(s)`;
+        `${lista.length} ${lista.length === 1 ? 'material encontrado' : 'materiais encontrados'}`;
 
       if (lista.length === 0) {
         grid.innerHTML = '<div style="color:#64748b;font-size:14px;padding:20px 0;">Nenhum material encontrado para essa busca.</div>';

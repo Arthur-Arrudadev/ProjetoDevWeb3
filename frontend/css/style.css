@@ -16,7 +16,7 @@
 
 body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); }
 
-/* SIDEBAR */
+/* BARRA LATERAL */
 .sidebar {
   width: 220px; background: var(--sidebar); color: #fff;
   height: 100vh; position: fixed; left: 0; top: 0;
@@ -58,11 +58,11 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--
 }
 .btn-logout:hover { background: rgba(239,68,68,0.4); }
 
-/* MAIN CONTENT */
+/* CONTEÚDO PRINCIPAL */
 .main { margin-left: 220px; padding: 28px; min-height: 100vh; }
 .page-title { font-size: 22px; font-weight: 700; margin-bottom: 24px; color: var(--text); }
 
-/* CARDS */
+/* CARTÕES */
 .card {
   background: var(--card); border-radius: 12px;
   padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
@@ -70,12 +70,12 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--
 }
 .card-title { font-size: 14px; font-weight: 600; color: var(--muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-/* GRID */
+/* GRADE */
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 
-/* STAT CARDS */
+/* CARTÕES DE ESTATÍSTICA */
 .stat-card {
   background: var(--card); border-radius: 12px; padding: 20px;
   border: 1px solid var(--border); display: flex; align-items: center; gap: 16px;
@@ -129,7 +129,7 @@ body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--
 }
 .alert.danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
 
-/* FILTRO MATERIAIS */
+/* FILTRO DE MATERIAIS */
 .filtro-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
 .btn-filtro {
   padding: 7px 16px; border-radius: 20px; border: 1.5px solid var(--border);
@@ -199,7 +199,7 @@ tbody tr:hover { background: #f8fafc; }
 .tempo-bar-fill { height: 8px; border-radius: 4px; background: var(--primary); transition: width 0.6s; }
 .tempo-valor { font-weight: 700; font-size: 14px; color: var(--primary); min-width: 60px; text-align: right; }
 
-/* CHART */
+/* GRÁFICO */
 #chartPizza { max-width: 220px; max-height: 220px; }
 .chart-legenda { display: flex; flex-direction: column; gap: 10px; justify-content: center; }
 .legenda-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }

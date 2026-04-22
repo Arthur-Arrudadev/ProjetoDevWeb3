@@ -51,10 +51,11 @@
         </div>
         <button id="btnIniciar" style="padding:10px 20px;background:#10b981;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">▶ Iniciar</button>
         <button id="btnFinalizar" style="padding:10px 20px;background:#ef4444;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:none;">⏹ Finalizar</button>
-        <span id="timerDisplay" style="font-size:14px;color:#64748b;font-weight:600;"></span>
+        <span id="timerDisplay" style="font-size:22px;color:#4f46e5;font-weight:700;font-family:monospace;"></span>
       </div>
       <div id="msgSessao" style="margin-top:10px;font-size:13px;color:#10b981;display:none;"></div>
     </div>
+
   </main>
 
   <script src="../js/app.js"></script>
@@ -63,16 +64,19 @@
     protegerPagina();
     document.getElementById('sidebar').innerHTML = renderSidebar('tempo.html');
 
+    const usuario = getUsuario();
     let sessaoAtiva = null;
     let timerInterval = null;
     let segundos = 0;
 
     async function carregarTempos() {
-      const usuario = getUsuario();
       const dados = await api(`/tempo/${usuario.id}`);
 
       if (dados.length === 0) {
         document.getElementById('listaTempos').innerHTML = '<div style="color:#64748b;font-size:14px;">Nenhuma sessão registrada ainda.</div>';
+        document.getElementById('tempoTotal').textContent = '0 min';
+        document.getElementById('totalAssuntos').textContent = '0';
+        document.getElementById('assuntoTop').textContent = '-';
         return;
       }
 
@@ -91,7 +95,7 @@
           <div class="tempo-item">
             <div style="min-width:140px;">
               <div class="tempo-assunto">${d.assunto}</div>
-              <div class="tempo-detalhe">${d.sessoes} sessão(ões) · ${primeira} → ${ultima}</div>
+              <div class="tempo-detalhe">${d.sessoes} ${d.sessoes === 1 ? 'sessão' : 'sessões'} · ${primeira} → ${ultima}</div>
             </div>
             <div class="tempo-bar-wrap">
               <div class="tempo-bar-bg">
@@ -116,7 +120,6 @@
     document.getElementById('btnIniciar').addEventListener('click', async () => {
       const assunto = document.getElementById('inputAssunto').value.trim();
       if (!assunto) { alert('Informe o assunto!'); return; }
-      const usuario = getUsuario();
       const data = await api('/sessao/iniciar', {
         method: 'POST',
         body: JSON.stringify({ usuario_id: usuario.id, assunto })

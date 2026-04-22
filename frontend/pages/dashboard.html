@@ -92,27 +92,50 @@
       </div>
     </div>
 
-    <!-- Gráfico de evolução semanal (linha) -->
-    <div class="card">
+    <!-- Gráfico de desempenho semanal -->
+    <div class="card" style="margin-bottom:24px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-        <div class="card-title" style="margin:0;">Evolução dos Últimos 7 Dias</div>
-        <div style="display:flex;gap:16px;font-size:12px;">
-          <span style="display:flex;align-items:center;gap:5px;">
-            <span style="width:12px;height:3px;background:#10b981;display:inline-block;border-radius:2px;"></span> Acertos
-          </span>
-          <span style="display:flex;align-items:center;gap:5px;">
-            <span style="width:12px;height:3px;background:#ef4444;display:inline-block;border-radius:2px;"></span> Erros
-          </span>
-          <span style="display:flex;align-items:center;gap:5px;">
-            <span style="width:12px;height:3px;background:#f59e0b;display:inline-block;border-radius:2px;"></span> Revisão
-          </span>
-        </div>
+        <div class="card-title" style="margin:0;">Desempenho por Dia da Semana — Últimas 4 Semanas</div>
       </div>
+      <div style="font-size:12px;color:#94a3b8;margin-bottom:16px;">Cada grupo de barras = um dia | Mais escuro = semana mais recente | 🟢 Acertos &nbsp; 🔴 Erros</div>
       <div id="semVolumeMsg" style="display:none;text-align:center;padding:40px 0;color:#94a3b8;font-size:14px;">
-        📊 Nenhum dado nos últimos 7 dias ainda.<br>
-        <small>Registre resultados para ver sua evolução aqui.</small>
+        📊 Nenhum resultado registrado ainda.<br>
+        <small>Faça um Quiz para ver seu desempenho aqui.</small>
       </div>
       <canvas id="chartLinha" style="max-height:280px;"></canvas>
+    </div>
+
+    <!-- Heatmap de atividade -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div class="card-title" style="margin:0;">Atividade de Estudo — Últimas 4 Semanas</div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#94a3b8;">
+          <span>Menos</span>
+          <div style="width:12px;height:12px;border-radius:3px;background:#e2e8f0;"></div>
+          <div style="width:12px;height:12px;border-radius:3px;background:#c7d2fe;"></div>
+          <div style="width:12px;height:12px;border-radius:3px;background:#818cf8;"></div>
+          <div style="width:12px;height:12px;border-radius:3px;background:#4f46e5;"></div>
+          <div style="width:12px;height:12px;border-radius:3px;background:#3730a3;"></div>
+          <span>Mais</span>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="border-collapse:separate;border-spacing:4px;">
+          <thead>
+            <tr>
+              <th style="width:70px;"></th>
+              <th style="font-size:11px;color:#94a3b8;font-weight:600;text-align:center;">Seg</th>
+              <th style="font-size:11px;color:#94a3b8;font-weight:600;text-align:center;">Ter</th>
+              <th style="font-size:11px;color:#94a3b8;font-weight:600;text-align:center;">Qua</th>
+              <th style="font-size:11px;color:#94a3b8;font-weight:600;text-align:center;">Qui</th>
+              <th style="font-size:11px;color:#94a3b8;font-weight:600;text-align:center;">Sex</th>
+              <th style="font-size:11px;color:#94a3b8;font-weight:600;text-align:center;">Sáb</th>
+              <th style="font-size:11px;color:#94a3b8;font-weight:600;text-align:center;">Dom</th>
+            </tr>
+          </thead>
+          <tbody id="heatmapBody"></tbody>
+        </table>
+      </div>
     </div>
 
   </main>
@@ -133,23 +156,7 @@
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
     });
 
-    // Gera os últimos 7 dias como labels
-    function ultimos7Dias() {
-      const dias = [];
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        dias.push(d.toISOString().slice(0, 10));
-      }
-      return dias;
-    }
-
-    function labelDia(iso) {
-      const [, m, d] = iso.split('-');
-      return `${d}/${m}`;
-    }
-
-    function renderMaterialCard(m) {
+function renderMaterialCard(m) {
       return `
         <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;">
           <div style="font-size:11px;font-weight:700;color:#4f46e5;background:#ede9fe;display:inline-block;padding:2px 8px;border-radius:10px;margin-bottom:8px;">${m.categoria}</div>
@@ -168,18 +175,16 @@
     }
 
     async function carregarDashboard() {
-      let dadosGeral, dadosEvolucao, dadosRec;
+      let dadosGeral, dadosSemanal, dadosRec;
       try {
-        [dadosGeral, dadosEvolucao, dadosRec] = await Promise.all([
-          api(`/dashboard/${usuario.id}`),
-          api(`/evolucao/${usuario.id}`),
-          api(`/recomendacao/${usuario.id}`)
-        ]);
+        dadosGeral = await api(`/dashboard/${usuario.id}`);
       } catch (e) {
         document.getElementById('resumoAtividades').innerHTML =
           `<span style="color:#ef4444">⚠️ Erro ao conectar com o backend.<br><small>${e.message}</small></span>`;
         return;
       }
+      try { dadosSemanal = await api(`/desempenho-semanal/${usuario.id}`); } catch { dadosSemanal = []; }
+      try { dadosRec = await api(`/recomendacao/${usuario.id}`); } catch { dadosRec = { assunto: null, materiais: [] }; }
 
       const r = dadosGeral.resultados;
       const s = dadosGeral.sessoes;
@@ -245,82 +250,58 @@
         </div>
       `).join('');
 
-      // Gráfico de linha semanal
-      const dias = ultimos7Dias();
-      const mapaEvolucao = {};
-      dadosEvolucao.forEach(d => {
-        mapaEvolucao[d.dia] = d;
-      });
-
-      const temDados = dadosEvolucao.length > 0;
+      // Gráfico de barras: eixo X = dias da semana, datasets = semanas
+      const temDados = dadosSemanal.some(s => s.dias.some(d => d.acertos > 0 || d.erros > 0));
       document.getElementById('semVolumeMsg').style.display = temDados ? 'none' : 'block';
       document.getElementById('chartLinha').style.display   = temDados ? 'block' : 'none';
 
       if (temDados) {
+        const diasLabels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+        const coresAcerto = ['rgba(16,185,129,0.9)','rgba(16,185,129,0.65)','rgba(16,185,129,0.4)','rgba(16,185,129,0.2)'];
+        const coresErro   = ['rgba(239,68,68,0.9)', 'rgba(239,68,68,0.65)', 'rgba(239,68,68,0.4)', 'rgba(239,68,68,0.2)'];
+
+        const datasets = [];
+        dadosSemanal.forEach((semana, i) => {
+          datasets.push({
+            label: `${semana.label} — Acertos`,
+            data: semana.dias.map(d => d.acertos),
+            backgroundColor: coresAcerto[i],
+            borderRadius: 4,
+            stack: `s${i}`
+          });
+          datasets.push({
+            label: `${semana.label} — Erros`,
+            data: semana.dias.map(d => d.erros),
+            backgroundColor: coresErro[i],
+            borderRadius: 4,
+            stack: `s${i}`
+          });
+        });
+
         new Chart(document.getElementById('chartLinha').getContext('2d'), {
-          type: 'line',
-          data: {
-            labels: dias.map(labelDia),
-            datasets: [
-              {
-                label: 'Acertos',
-                data: dias.map(d => parseInt(mapaEvolucao[d]?.acertos) || 0),
-                borderColor: '#10b981',
-                backgroundColor: 'rgba(16,185,129,0.08)',
-                borderWidth: 2.5,
-                pointBackgroundColor: '#10b981',
-                pointRadius: 4,
-                tension: 0.4,
-                fill: true
-              },
-              {
-                label: 'Erros',
-                data: dias.map(d => parseInt(mapaEvolucao[d]?.erros) || 0),
-                borderColor: '#ef4444',
-                backgroundColor: 'rgba(239,68,68,0.06)',
-                borderWidth: 2.5,
-                pointBackgroundColor: '#ef4444',
-                pointRadius: 4,
-                tension: 0.4,
-                fill: true
-              },
-              {
-                label: 'Revisão',
-                data: dias.map(d => parseInt(mapaEvolucao[d]?.revisao) || 0),
-                borderColor: '#f59e0b',
-                backgroundColor: 'rgba(245,158,11,0.06)',
-                borderWidth: 2.5,
-                pointBackgroundColor: '#f59e0b',
-                pointRadius: 4,
-                tension: 0.4,
-                fill: true
-              }
-            ]
-          },
+          type: 'bar',
+          data: { labels: diasLabels, datasets },
           options: {
             responsive: true,
             plugins: {
-              legend: { display: false },
+              legend: {
+                display: true,
+                position: 'bottom',
+                labels: { font: { size: 11 }, boxWidth: 12, filter: i => i.text.includes('Acertos') }
+              },
               tooltip: {
-                mode: 'index',
-                intersect: false,
                 callbacks: {
-                  title: (items) => `Dia ${items[0].label}`
+                  label: (item) => {
+                    const tipo = item.dataset.label.includes('Acertos') ? '✅' : '❌';
+                    return ` ${tipo} ${item.dataset.label.split(' — ')[0]}: ${item.raw}`;
+                  }
                 }
               }
             },
             scales: {
-              x: {
-                grid: { color: '#f1f5f9' },
-                ticks: { font: { size: 12 }, color: '#94a3b8' }
-              },
-              y: {
-                beginAtZero: true,
-                grid: { color: '#f1f5f9' },
-                ticks: { font: { size: 12 }, color: '#94a3b8', stepSize: 1 }
-              }
-            },
-            interaction: { mode: 'index', intersect: false }
+              x: { grid: { color: '#f1f5f9' }, ticks: { font: { size: 12 }, color: '#94a3b8' } },
+              y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 12 }, color: '#94a3b8', stepSize: 1 } }
+            }
           }
         });
       }
@@ -328,6 +309,53 @@
 
     carregarMateriais();
     carregarDashboard();
+
+    // Heatmap
+    function corHeatmap(min) {
+      if (min === 0) return '#e2e8f0';
+      if (min < 15)  return '#c7d2fe';
+      if (min < 30)  return '#818cf8';
+      if (min < 60)  return '#4f46e5';
+      return '#3730a3';
+    }
+
+    async function renderHeatmap() {
+      let mapa = {};
+      try { mapa = await api(`/heatmap/${usuario.id}`); } catch {}
+
+      const tbody = document.getElementById('heatmapBody');
+      tbody.innerHTML = '';
+      const hoje = new Date();
+      const diaSemanaHoje = (hoje.getDay() + 6) % 7;
+      const segundaAtual = new Date(hoje);
+      segundaAtual.setDate(hoje.getDate() - diaSemanaHoje);
+
+      for (let semana = 3; semana >= 0; semana--) {
+        const tr = document.createElement('tr');
+        const label = document.createElement('td');
+        label.style.cssText = 'font-size:11px;color:#94a3b8;font-weight:600;padding-right:8px;white-space:nowrap;';
+        label.textContent = `Semana ${4 - semana}`;
+        tr.appendChild(label);
+
+        const segundaSemana = new Date(segundaAtual);
+        segundaSemana.setDate(segundaAtual.getDate() - semana * 7);
+
+        for (let dia = 0; dia < 7; dia++) {
+          const d = new Date(segundaSemana);
+          d.setDate(segundaSemana.getDate() + dia);
+          const iso = d.toISOString().slice(0, 10);
+          const min = mapa[iso] || 0;
+          const isFuturo = d > hoje;
+          const td = document.createElement('td');
+          td.style.cssText = `width:32px;height:32px;border-radius:6px;background:${isFuturo ? '#f8fafc' : corHeatmap(min)};border:1px solid ${isFuturo ? '#f1f5f9' : 'transparent'};`;
+          if (!isFuturo && min > 0) td.title = `${iso}: ${formatarMinutos(min)}`;
+          tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+      }
+    }
+
+    renderHeatmap();
   </script>
 </body>
 </html>
