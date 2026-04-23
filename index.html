@@ -69,7 +69,12 @@
   </div>
 
   <script>
-    const API = 'http://localhost:3001/api';
+    // Usa URL relativa para funcionar com proxy nginx
+    // Se estiver em localhost:3001, usa URL absoluta
+    // Se estiver em outra porta (como 8080 com proxy), usa URL relativa
+    const API = window.location.port === '3001' 
+      ? 'http://localhost:3001/api'  // Para desenvolvimento direto
+      : '/api';  // Para produção com proxy
 
     function irDashboard() {
       const base = window.location.href.replace(/\/[^\/]+$/, '');
@@ -91,6 +96,37 @@
     function limparAlertas() {
       document.getElementById('alertErro').style.display = 'none';
       document.getElementById('alertSucesso').style.display = 'none';
+    }
+
+    function getUsuariosLocais() {
+      try {
+        return JSON.parse(localStorage.getItem('usuarios_locais')) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function salvarUsuariosLocais(usuarios) {
+      localStorage.setItem('usuarios_locais', JSON.stringify(usuarios));
+    }
+
+    function acharUsuarioLocal(usuario) {
+      return getUsuariosLocais().find(u => u.usuario === usuario);
+    }
+
+    function criarUsuarioLocal({ nome, usuario, senha }) {
+      const usuarios = getUsuariosLocais();
+      if (usuarios.some(u => u.usuario === usuario)) return null;
+      const novo = { id: Date.now(), nome, usuario, senha, local: true };
+      usuarios.push(novo);
+      salvarUsuariosLocais(usuarios);
+      return novo;
+    }
+
+    function loginLocal(usuario, senha) {
+      const user = acharUsuarioLocal(usuario);
+      if (!user || user.senha !== senha) return null;
+      return { id: user.id, nome: user.nome, usuario: user.usuario, local: true };
     }
 
     function mostrarCadastro() {
@@ -137,7 +173,14 @@
         localStorage.setItem('usuario', JSON.stringify(data.usuario));
         irDashboard();
       } catch {
-        mostrarErro('Não foi possível conectar ao servidor. Verifique se o backend está rodando.');
+        const localUser = loginLocal(usuario, senha);
+        if (localUser) {
+          localStorage.setItem('usuario', JSON.stringify(localUser));
+          mostrarSucesso('Login local realizado. Você está no modo offline.');
+          setTimeout(irDashboard, 800);
+        } else {
+          mostrarErro('Não foi possível conectar ao servidor. Verifique se o backend está rodando.');
+        }
       } finally {
         btn.textContent = 'Entrar'; btn.disabled = false;
       }
@@ -182,7 +225,14 @@
         document.getElementById('formCadastro').reset();
         setTimeout(mostrarLogin, 1500);
       } catch {
-        mostrarErro('Não foi possível conectar ao servidor.');
+        const novoUsuario = criarUsuarioLocal({ nome, usuario, senha });
+        if (novoUsuario) {
+          mostrarSucesso('Conta criada localmente! Faça login para continuar.');
+          document.getElementById('formCadastro').reset();
+          setTimeout(mostrarLogin, 1500);
+        } else {
+          mostrarErro('Não foi possível conectar ao servidor. Usuário já existe localmente ou não foi possível criar.');
+        }
       } finally {
         btn.textContent = 'Criar conta'; btn.disabled = false;
       }

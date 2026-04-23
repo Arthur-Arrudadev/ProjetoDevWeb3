@@ -1,4 +1,8 @@
-const API = 'http://localhost:3001/api';
+// Usa URL relativa para funcionar com proxy nginx
+// Se estiver em localhost:8080, o /api será encaminhado ao backend
+const API = window.location.origin.includes('localhost:3001') 
+  ? 'http://localhost:3001/api'  // Para desenvolvimento direto
+  : '/api';  // Para produção com proxy
 
 function getUsuario() {
   try { return JSON.parse(localStorage.getItem('usuario')); } catch { return null; }
