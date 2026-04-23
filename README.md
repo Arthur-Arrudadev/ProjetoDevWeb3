@@ -1,60 +1,65 @@
 # 📚 Sistema de Estudo
 
 ## Pré-requisitos
-- [XAMPP](https://www.apachefriends.org/pt_br/download.html) instalado
 - [Node.js](https://nodejs.org/) instalado
-- Navegador Google Chrome
+- [Docker Desktop](https://www.docker.com/products/docker-desktop) instalado e rodando (para uso local do banco de dados)
+- Conta GitHub para usar Codespaces (opcional, mas recomendado)
 
 ---
 
 ## ▶️ Como Rodar
 
-### 1. Configurar o banco de dados
+### 🚀 Usando GitHub Codespaces (Recomendado)
 
-**a) Abra o XAMPP Control Panel e inicie o MySQL:**
-- Clique em **Start** no **MySQL**
-- Aguarde ficar verde
+1.  **Abra o projeto em um Codespace:**
+    *   No repositório GitHub, clique no botão "Code" e selecione "Create codespace on main".
+    *   O Codespace será inicializado, instalando as dependências e configurando o ambiente automaticamente.
+    *   O banco de dados MySQL será iniciado via Docker Compose, e o `init.sql` será executado para criar o esquema e popular os dados.
 
-**b) Abra o phpMyAdmin:**
-- Clique em **Admin** ao lado do MySQL no XAMPP
-- Ou acesse: http://localhost/phpmyadmin
+2.  **Aguarde a inicialização:**
+    *   Os comandos definidos no `.devcontainer/devcontainer.json` cuidarão de:
+        *   Instalar o `serve` (servidor estático para o frontend).
+        *   Instalar as dependências do backend (`npm install`).
+        *   Iniciar o backend (`node server.js`).
+        *   Iniciar o frontend (`serve -l 8080`).
+    *   Você verá mensagens no terminal sobre a API rodando na porta 3001 e o frontend na porta 8080.
 
-**c) Importe o banco:**
-- Clique em **SQL** no topo
-- Copie TODO o conteúdo do arquivo `database/init.sql`
-- Cole na caixa de texto e clique em **Executar**
+3.  **Acesse a aplicação:**
+    *   O Codespaces detectará as portas 3001 (backend) e 8080 (frontend) e as forwardará.
+    *   Clique nos links que aparecerão na aba "Ports" do VS Code para abrir o frontend (porta 8080) e testar o backend (porta 3001).
+    *   O frontend será aberto automaticamente no seu navegador.
 
-> ⚠️ Se já tinha o banco criado antes, apague o banco `sistema_estudo` no phpMyAdmin e reimporte o `init.sql` para incluir a tabela de questões do Quiz.
+### 💻 Rodando Localmente com Docker (apenas para o banco de dados)
 
----
+1.  **Certifique-se de ter o Docker Desktop instalado e rodando.**
+2.  **Navegue até a raiz do projeto no terminal:**
+    ```bash
+    cd /caminho/para/ProjetoDevWeb3
+    ```
+3.  **Inicie o serviço do banco de dados com Docker Compose:**
+    ```bash
+    docker compose up -d
+    ```
+    Isso iniciará o banco de dados MySQL. O `init.sql` será executado automaticamente na primeira vez para criar o esquema e popular os dados.
 
-### 2. Iniciar o backend
+4.  **Inicie o Backend (em um novo terminal):**
+    ```bash
+    cd backend
+    npm install # Execute apenas na primeira vez ou se as dependências mudarem
+    node server.js
+    ```
+    Aguarde ver no terminal: `API rodando na porta 3001` e `Banco conectado!`
 
-**Opção 1 — Duplo clique no arquivo:**
-```
-iniciar.bat
-```
+5.  **Inicie o Frontend (em outro novo terminal):**
+    ```bash
+    cd frontend
+    npm install -g serve # Execute apenas na primeira vez
+    serve -l 8080
+    ```
+    O frontend estará acessível em `http://localhost:8080`.
 
-**Opção 2 — Pelo terminal:**
-```bash
-cd backend
-npm install
-node server.js
-```
-
-Aguarde ver no terminal: `API rodando na porta 3001` e `Banco conectado!`
-
----
-
-### 3. Abrir o frontend no Chrome
-
-**Feche todas as janelas do Chrome**, depois abra o terminal e execute:
-
-```bash
-start chrome --disable-web-security --user-data-dir="C:/tmp/chrome-dev" "c:/Users/arthu/OneDrive/Documentos/Sistema de Estudo/index.html"
-```
-
-> ⚠️ Isso é necessário porque o Chrome bloqueia requisições `fetch` quando o arquivo é aberto via `file://`.
+6.  **Acesse a aplicação:**
+    *   Abra seu navegador e acesse `http://localhost:8080`.
 
 ---
 
@@ -99,17 +104,8 @@ start chrome --disable-web-security --user-data-dir="C:/tmp/chrome-dev" "c:/User
 ---
 
 ## 🛑 Parar o sistema
-- Feche a janela do terminal onde o backend está rodando
-- Pare o MySQL no XAMPP Control Panel
-
----
-
-## 🐳 Alternativa com Docker
-
-Se preferir usar Docker ao invés do XAMPP:
-
 ```bash
-docker compose up --build
+docker compose down
 ```
 
 (Requer Docker Desktop instalado e rodando)

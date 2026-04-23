@@ -1,0 +1,41 @@
+{
+  "name": "Sistema de Estudo",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "db", // Indica ao Codespaces para iniciar o serviço 'db' do docker-compose.yml
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "/bin/bash"
+          }
+        }
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker",
+        "ms-vscode.js-debug"
+      ]
+    }
+  },
+
+  "portsAttributes": {
+    "3001": {
+      "label": "Backend API",
+      "onAutoForward": "notify"
+    },
+    "8080": {
+      "label": "Frontend App",
+      "onAutoForward": "openBrowser"
+    }
+  },
+
+  // Comandos executados uma vez após a criação do Codespace
+  "postCreateCommand": "npm install -g serve && cd backend && npm install",
+  // Comandos executados toda vez que o Codespace é iniciado ou reiniciado
+  "postStartCommand": "cd backend && node server.js & cd ../frontend && serve -l 8080 &"
+}

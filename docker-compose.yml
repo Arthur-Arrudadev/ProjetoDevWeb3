@@ -1,42 +1,22 @@
 version: '3.8'
 
 services:
-  mysql:
+  db:
     image: mysql:8.0
-    container_name: estudo_mysql
-    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_ROOT_PASSWORD: "" # Senha vazia para o usuário root, consistente com a configuração original
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes" # Permite senha vazia para o root no MySQL 8
       MYSQL_DATABASE: sistema_estudo
-    ports:
-      - "3307:3306"
     volumes:
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - mysql_data:/var/lib/mysql
+      - db_data:/var/lib/mysql # Volume para persistência dos dados do banco
+    ports:
+      - "3306:3306" # Expõe a porta 3306 para acesso externo, se necessário
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root"]
+      interval: 5s
       timeout: 5s
       retries: 5
 
-  backend:
-    build: ./backend
-    container_name: estudo_backend
-    restart: always
-    ports:
-      - "3001:3001"
-    environment:
-      DB_HOST: mysql
-      DB_USER: root
-      DB_PASSWORD: root123
-      DB_NAME: sistema_estudo
-      PORT: 3001
-    depends_on:
-      mysql:
-        condition: service_healthy
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-
 volumes:
-  mysql_data:
+  db_data:

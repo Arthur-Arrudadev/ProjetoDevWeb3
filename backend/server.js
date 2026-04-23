@@ -10,7 +10,7 @@ app.use(express.json()); // Interpreta o corpo das requisições como JSON
 // Configurações de conexão com o banco de dados
 // Usa variáveis de ambiente se disponíveis, senão usa os valores padrão do XAMPP
 const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
+  host: process.env.DB_HOST || 'db', // 'db' é o nome do serviço do banco de dados no docker-compose.yml
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'sistema_estudo',
