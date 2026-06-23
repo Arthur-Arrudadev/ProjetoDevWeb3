@@ -27,15 +27,15 @@ Projeto desenvolvido por Arthur Arruda e Maria Eduarda como trabalho da discipli
 
 🛠️ Tecnologias utilizadas
 
-Frontend
+# Frontend
 
 TecnologiaVersãoUsoReact19Interface do usuárioReact Router DOM7Navegação entre páginasRecharts3Gráficos do dashboardVite8Bundler e servidor de desenvolvimento
 
-Backend
+# Backend
 
 TecnologiaVersãoUsoNode.js18+ServidorExpress5Framework HTTPPostgreSQL16Banco de dados relacionalbcryptjs2Hash de senhaspg8Driver do PostgreSQL
 
-Infraestrutura
+# Infraestrutura
 
 TecnologiaUsoDockerContainerização dos serviçosDocker ComposeOrquestração dos containersNginxProxy reverso (roteamento /api → backend, / → frontend)
 
