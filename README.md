@@ -8,15 +8,20 @@ Projeto desenvolvido por Arthur Arruda e Maria Eduarda como trabalho da discipli
 🚀 Funcionalidades
 
  
- - ✅ Cadastro e login de usuário com senha criptografada (bcrypt)
- - ✅ Quiz de questões com filtro por disciplina e ano
- - ✅ Marcação de questões para revisão
- - ✅ Dashboard de desempenho com gráficos de acertos, erros e revisão
- - ✅ Filtros por disciplina e período (7, 30, 90 dias ou todo período)
- - ✅ Página de resultados com exportação em PDF
- - ✅ Edição de perfil com nome e foto (upload em base64)
- - ✅ Alteração de senha com validação da senha atual
- - ✅ Recuperação de senha via token com expiração de 30 minutos
+- ✅ Cadastro e login de usuário com senha criptografada (bcrypt, salt rounds 12)
+- ✅ Validação de formato de e-mail no backend (rejeita e-mails inválidos)
+- ✅ Quiz de questões com filtro por disciplina e ano
+- ✅ Imagens das questões renderizadas corretamente no quiz
+- ✅ Cronômetro de tempo estudado durante o quiz
+- ✅ Marcação de questões para revisão (salva no banco de dados)
+- ✅ Registro automático de sessões de estudo com tempo em minutos
+- ✅ Dashboard de desempenho com gráficos de acertos, erros e revisão
+- ✅ Filtros por disciplina e período (7, 30, 90 dias ou todo período)
+- ✅ Sessões realizadas e tempo estudado contabilizados no dashboard
+- ✅ Página de resultados com exportação em PDF
+- ✅ Edição de perfil com nome e foto (upload em base64, limite de 2MB)
+- ✅ Alteração de senha com validação da senha atual via bcrypt
+- ✅ Recuperação de senha via token com expiração de 30 minutos
 
 
 
