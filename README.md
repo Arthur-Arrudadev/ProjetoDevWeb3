@@ -61,14 +61,18 @@ TecnologiaUsoDockerContainerização dos serviçosDocker ComposeOrquestração d
 # Passo a passo
 
 1. Clonar o repositório
+```
 bashgit clone https://github.com/Arthur-Arrudadev/ProjetoDevWeb3.git
 cd ProjetoDevWeb3
-
-2. Entrar na pasta do projeto
+```
+3. Entrar na pasta do projeto
+```
 bashcd nexus-study-completo
-
-3. Subir todos os serviços com Docker
+```
+4. Subir todos os serviços com Docker
+```
 bashdocker compose up --build
+```
 Esse comando vai:
 
 Criar e iniciar o banco de dados PostgreSQL
@@ -78,7 +82,9 @@ Iniciar o frontend na porta 3000
 Iniciar o Nginx na porta 80 fazendo o roteamento
 
 4. Acessar no navegador
+```
 http://localhost
+```
 Pronto! O sistema estará rodando. 🎉
 
 ⏹️ Parar o projeto
