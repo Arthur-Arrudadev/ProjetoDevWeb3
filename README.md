@@ -42,13 +42,13 @@ TecnologiaUsoDockerContainerização dos serviçosDocker ComposeOrquestração d
 
 📁 Estrutura do projeto
 
-nexus-study/
-├── backend/          # API REST em Node.js + Express
-├── frontend/         # Interface em React + Vite
-├── database/         # Script SQL de criação das tabelas
-├── seeder/           # Popula o banco com questões do ENEM
-├── nginx/            # Configuração do proxy reverso
-└── docker-compose.yml
+- nexus-study/
+- ├── backend/        -   # API REST em Node.js + Express
+- ├── frontend/       -  # Interface em React + Vite
+- ├── database/       -  # Script SQL de criação das tabelas
+- ├── seeder/         -  # Popula o banco com questões do ENEM
+- ├── nginx/          -  # Configuração do proxy reverso
+- └── docker-compose.yml
 
 
 ▶️ Como rodar o projeto
