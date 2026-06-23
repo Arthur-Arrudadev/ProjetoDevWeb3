@@ -1,0 +1,139 @@
+📚 Nexus Study
+
+Plataforma web de estudos inteligente desenvolvida para estudo e avaliação de questões do ENEM. O sistema permite que o usuário resolva questões, acompanhe seu desempenho em um dashboard com gráficos e gerencie seu perfil.
+
+Projeto desenvolvido por Arthur Arruda e Maria Eduarda como trabalho da disciplina de Desenvolvimento de Sistemas Web.
+
+
+🚀 Funcionalidades
+
+ 
+ - ✅ Cadastro e login de usuário com senha criptografada (bcrypt)
+ - ✅ Quiz de questões com filtro por disciplina e ano
+ - ✅ Marcação de questões para revisão
+ - ✅ Dashboard de desempenho com gráficos de acertos, erros e revisão
+ - ✅ Filtros por disciplina e período (7, 30, 90 dias ou todo período)
+ - ✅ Página de resultados com exportação em PDF
+ - ✅ Edição de perfil com nome e foto (upload em base64)
+ - ✅ Alteração de senha com validação da senha atual
+ - ✅ Recuperação de senha via token com expiração de 30 minutos
+
+
+
+🛠️ Tecnologias utilizadas
+
+Frontend
+
+TecnologiaVersãoUsoReact19Interface do usuárioReact Router DOM7Navegação entre páginasRecharts3Gráficos do dashboardVite8Bundler e servidor de desenvolvimento
+
+Backend
+
+TecnologiaVersãoUsoNode.js18+ServidorExpress5Framework HTTPPostgreSQL16Banco de dados relacionalbcryptjs2Hash de senhaspg8Driver do PostgreSQL
+
+Infraestrutura
+
+TecnologiaUsoDockerContainerização dos serviçosDocker ComposeOrquestração dos containersNginxProxy reverso (roteamento /api → backend, / → frontend)
+
+
+📁 Estrutura do projeto
+
+nexus-study/
+├── backend/          # API REST em Node.js + Express
+├── frontend/         # Interface em React + Vite
+├── database/         # Script SQL de criação das tabelas
+├── seeder/           # Popula o banco com questões do ENEM
+├── nginx/            # Configuração do proxy reverso
+└── docker-compose.yml
+
+
+▶️ Como rodar o projeto
+
+Pré-requisitos
+
+Ter instalado na máquina:
+
+
+Docker Desktop (inclui Docker e Docker Compose)
+Git
+
+
+Passo a passo
+
+1. Clonar o repositório
+
+bashgit clone https://github.com/Arthur-Arrudadev/ProjetoDevWeb3.git
+cd ProjetoDevWeb3
+
+2. Entrar na pasta do projeto
+
+bashcd nexus-study
+
+3. Subir todos os serviços com Docker
+
+bashdocker compose up --build
+
+
+Esse comando vai:
+
+
+Criar e iniciar o banco de dados PostgreSQL
+
+- Popular o banco com as questões do ENEM automaticamente (seeder)
+- Iniciar o backend na porta 4000
+- Iniciar o frontend na porta 3000
+- Iniciar o Nginx na porta 80 fazendo o roteamento
+
+
+
+
+4. Acessar no navegador
+
+http://localhost
+
+Pronto! O sistema estará rodando. 🎉
+
+
+👤 Testando o sistema
+
+
+Acesse http://localhost
+Clique em Criar conta e cadastre um usuário
+Faça login com o e-mail e senha cadastrados
+Acesse o Quiz, selecione disciplina e ano e responda as questões
+Acesse o Dashboard para ver seu desempenho
+Acesse Perfil para editar nome, foto e senha
+
+
+
+⏹️ Parar o projeto
+
+bashdocker compose down
+
+Para parar e apagar os dados do banco:
+
+bashdocker compose down -v
+
+
+🗄️ Banco de dados
+
+O banco é criado automaticamente ao subir os containers. As tabelas são:
+
+
+- users — usuários cadastrados
+- questions — questões do ENEM
+- alternatives — alternativas de cada questão
+- user_answers — respostas dos usuários
+- results — desempenho por disciplina e dia
+- study_sessions — sessões de estudo
+- password_reset_tokens — tokens de recuperação de senha
+
+
+
+👥 Equipe
+
+IntegranteResponsabilidade
+
+- Arthur Arruda - Backend - Frontend - Docker - integração geral
+- Maria Eduarda - Documentação - requisitos - protótipos e casos de uso
+
+
