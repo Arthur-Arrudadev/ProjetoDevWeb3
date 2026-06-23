@@ -40,9 +40,9 @@ TecnologiaVersãoUsoNode.js18+ServidorExpress5Framework HTTPPostgreSQL16Banco de
 TecnologiaUsoDockerContainerização dos serviçosDocker ComposeOrquestração dos containersNginxProxy reverso (roteamento /api → backend, / → frontend)
 
 
-📁 Estrutura do projeto
+# 📁 Estrutura do projeto
 
-- nexus-study/
+- nexus-study-completo/
 - ├── backend/        -   # API REST em Node.js + Express
 - ├── frontend/       -  # Interface em React + Vite
 - ├── database/       -  # Script SQL de criação das tabelas
