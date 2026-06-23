@@ -53,49 +53,38 @@ TecnologiaUsoDockerContainerização dos serviçosDocker ComposeOrquestração d
 
 ▶️ Como rodar o projeto
 
-Pré-requisitos
+# Pré-requisitos
 
-Ter instalado na máquina:
+- Docker Desktop
+- Git
 
-
-Docker Desktop (inclui Docker e Docker Compose)
-Git
-
-
-Passo a passo
+# Passo a passo
 
 1. Clonar o repositório
-
 bashgit clone https://github.com/Arthur-Arrudadev/ProjetoDevWeb3.git
 cd ProjetoDevWeb3
 
 2. Entrar na pasta do projeto
-
-bashcd nexus-study
+bashcd nexus-study-completo
 
 3. Subir todos os serviços com Docker
-
 bashdocker compose up --build
-
-
 Esse comando vai:
 
-
 Criar e iniciar o banco de dados PostgreSQL
-
-- Popular o banco com as questões do ENEM automaticamente (seeder)
-- Iniciar o backend na porta 4000
-- Iniciar o frontend na porta 3000
-- Iniciar o Nginx na porta 80 fazendo o roteamento
-
-
-
+Popular o banco com as questões do ENEM automaticamente (seeder)
+Iniciar o backend na porta 4000
+Iniciar o frontend na porta 3000
+Iniciar o Nginx na porta 80 fazendo o roteamento
 
 4. Acessar no navegador
-
 http://localhost
-
 Pronto! O sistema estará rodando. 🎉
+
+⏹️ Parar o projeto
+bashdocker compose down
+Para parar e apagar os dados do banco:
+bashdocker compose down -v
 
 
 👤 Testando o sistema
@@ -123,7 +112,6 @@ bashdocker compose down -v
 
 O banco é criado automaticamente ao subir os containers. As tabelas são:
 
-
 - users — usuários cadastrados
 - questions — questões do ENEM
 - alternatives — alternativas de cada questão
@@ -131,6 +119,7 @@ O banco é criado automaticamente ao subir os containers. As tabelas são:
 - results — desempenho por disciplina e dia
 - study_sessions — sessões de estudo
 - password_reset_tokens — tokens de recuperação de senha
+
 
 - `user_answers` — Respostas dos usuários (UNIQUE por usuário+questão, impede resposta duplicada)
 - `results` — Desempenho por disciplina e dia (acertos, erros, revisão — atualizado via UPSERT)
