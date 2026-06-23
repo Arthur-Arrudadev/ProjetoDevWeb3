@@ -132,7 +132,10 @@ O banco é criado automaticamente ao subir os containers. As tabelas são:
 - study_sessions — sessões de estudo
 - password_reset_tokens — tokens de recuperação de senha
 
-
+- `user_answers` — Respostas dos usuários (UNIQUE por usuário+questão, impede resposta duplicada)
+- `results` — Desempenho por disciplina e dia (acertos, erros, revisão — atualizado via UPSERT)
+- `study_sessions` — Sessões de estudo salvas automaticamente ao finalizar o quiz com duração em minutos
+- `password_reset_tokens` — Tokens de recuperação de senha (expiram em 30 min, invalidados após uso)
 
 👥 Equipe
 
