@@ -88,31 +88,29 @@ http://localhost
 Pronto! O sistema estará rodando. 🎉
 
 ⏹️ Parar o projeto
+```
 bashdocker compose down
+```
 Para parar e apagar os dados do banco:
-bashdocker compose down -v
-
+```
+bashdocker compose down -v
+```
 
 👤 Testando o sistema
 
 
-Acesse http://localhost
-Clique em Criar conta e cadastre um usuário
-Faça login com o e-mail e senha cadastrados
-Acesse o Quiz, selecione disciplina e ano e responda as questões
-Acesse o Dashboard para ver seu desempenho
-Acesse Perfil para editar nome, foto e senha
+👤 Testando o sistema
 
-
-
-⏹️ Parar o projeto
-
-bashdocker compose down
-
-Para parar e apagar os dados do banco:
-
-bashdocker compose down -v
-
+1. Acesse `http://localhost`
+2. Clique em **Criar conta** e cadastre um usuário.
+3. Faça login com o e-mail e senha cadastrados.
+4. Acesse o **Quiz**, selecione disciplina, ano e número de questões.
+5. Responda as questões — o cronômetro conta o tempo automaticamente.
+6. Use o botão **Marcar para Revisão** para salvar questões para revisar depois.
+7. Ao finalizar, a sessão de estudo é registrada automaticamente.
+8. Acesse o **Dashboard** para ver acertos, erros, revisões, sessões e tempo estudado.
+9. Acesse **Perfil** para editar nome, foto e senha.
+10. Para recuperar a senha, clique em **Esqueci minha senha** na tela de login.
 
 🗄️ Banco de dados
 
