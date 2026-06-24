@@ -129,9 +129,9 @@ O banco é criado automaticamente ao subir os containers. As tabelas são:
 
 👥 Equipe
 
-IntegranteResponsabilidade
+Integrante Responsabilidade
 
-- Arthur Arruda - Backend - Frontend - Docker - integração geral
-- Maria Eduarda - Documentação - requisitos - protótipos e casos de uso
+- 1 Arthur Arruda - Backend - Frontend - Docker - integração geral
+- 2 Maria Eduarda - Documentação - requisitos - protótipos e casos de uso
 
 
