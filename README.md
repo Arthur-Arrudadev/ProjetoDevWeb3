@@ -98,9 +98,6 @@ bashdocker compose down -v
 
 👤 Testando o sistema
 
-
-👤 Testando o sistema
-
 1. Acesse `http://localhost`
 2. Clique em **Criar conta** e cadastre um usuário.
 3. Faça login com o e-mail e senha cadastrados.
