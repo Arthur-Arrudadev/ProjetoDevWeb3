@@ -84,7 +84,14 @@ Iniciar o Nginx na porta 80 fazendo o roteamento
 4. Acessar no navegador
 ```
 http://localhost
+``` 
+
+5. NUVEM - Endereço IPv4 público rodar direto
+
 ```
+100.54.38.73
+```
+
 Pronto! O sistema estará rodando. 🎉
 
 ⏹️ Parar o projeto
