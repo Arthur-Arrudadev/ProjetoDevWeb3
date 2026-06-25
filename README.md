@@ -89,7 +89,7 @@ http://localhost
 5. NUVEM - Endereço IPv4 público rodar direto
 
 ```
-100.54.38.73
+34.205.4.148
 ```
 
 Pronto! O sistema estará rodando. 🎉
